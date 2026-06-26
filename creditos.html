@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Créditos fotográficos · Mipiú Espacios Múltiples</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400&display=swap" />
+  <link rel="stylesheet" href="styles.css?v=20260626e" />
+  <style>
+    .page-credits { padding: clamp(1.4rem,5vw,4rem) var(--pad); max-width: 900px; }
+    .page-credits a.back { font-family: var(--mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; border-bottom:2px solid var(--ink); }
+    .page-credits h1 { font-family: var(--display); font-weight:700; font-size:clamp(2.2rem,6vw,4rem); letter-spacing:-0.03em; margin:1.6rem 0 1rem; }
+    .page-credits .intro { font-size:1rem; color:var(--ink-80); max-width:60ch; margin-bottom:2rem; }
+    .credits-list { display:flex; flex-direction:column; gap:.2rem; }
+    .credits-list li { font-family: var(--mono); font-size:.8rem; line-height:1.6; padding:.8rem 0; border-top:1px solid rgba(0,0,0,.16); }
+    .credits-list a { border-bottom:1px solid currentColor; }
+  </style>
+</head>
+<body class="page-credits">
+  <a class="back" href="index.html">← Volver a Mipiú</a>
+  <h1>Créditos fotográficos</h1>
+  <p class="intro">Las imágenes de muestra de este sitio provienen de <a href="https://openverse.org" target="_blank" rel="noopener">Openverse</a> bajo licencias Creative Commons, y serán reemplazadas por fotos propias de Mipiú. Aquí está la atribución de cada una.</p>
+  <ul class="credits-list" data-credits></ul>
+  <script defer src="lib/credits-render.js?v=20260626e"></script>
+</body>
+</html>
