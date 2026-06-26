@@ -255,6 +255,8 @@ p { text-wrap: pretty; }
    8. SERVICIOS
    ============================================================= */
 .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
+.service-cell { height: 100%; }
+.service-card { display: flex; flex-direction: column; height: 100%; }
 .card {
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
   padding: clamp(1.5rem, 2.5vw, 2rem); box-shadow: var(--shadow-sm);
@@ -267,9 +269,10 @@ p { text-wrap: pretty; }
 .service-card h3 { font-size: 1.25rem; }
 .service-card p { color: var(--muted); margin-top: .55rem; font-size: .98rem; }
 .service-tag {
-  display: inline-block; margin-top: 1rem; font-size: .74rem; font-weight: 600;
+  display: inline-block; margin-top: auto; align-self: flex-start; font-size: .74rem; font-weight: 600;
   color: var(--ink-80); background: var(--tint-celeste); padding: .35em .8em; border-radius: var(--pill);
 }
+.service-card p { margin-bottom: 1.2rem; }
 
 /* =============================================================
    9. GALERÍA (masonry)

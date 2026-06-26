@@ -80,12 +80,14 @@
       var ic = ICONS[sp.icon] || ICONS.sparkles;
       var d = (i % 3) + 1;
       return ''
-      + '<article class="card service-card lift" data-reveal="rise" data-d="'+d+'">'
-      +   '<div class="icon-tile tile-'+tint+'">'+ic+'</div>'
-      +   '<h3>'+escHTML(sp.name)+'</h3>'
-      +   '<p>'+escHTML(sp.text)+'</p>'
-      +   '<span class="service-tag">'+escHTML(sp.type)+'</span>'
-      + '</article>';
+      + '<div class="service-cell" data-reveal="fade" data-d="'+d+'">'
+      +   '<article class="card service-card lift">'
+      +     '<div class="icon-tile tile-'+tint+'">'+ic+'</div>'
+      +     '<h3>'+escHTML(sp.name)+'</h3>'
+      +     '<p>'+escHTML(sp.text)+'</p>'
+      +     '<span class="service-tag">'+escHTML(sp.type)+'</span>'
+      +   '</article>'
+      + '</div>';
     }).join("");
     box.dataset.mounted = "1";
   }
@@ -287,6 +289,15 @@
         scrollTrigger: { trigger: "#beneficios", start: "top bottom", end: "bottom top", scrub: 1 }
       });
     }
+    // Tarjetas de servicios: giro suave al paso del scroll (el hover queda en la tarjeta interior)
+    gsap.utils.toArray(".service-cell").forEach(function(cell, i){
+      var dir = (i % 2) ? 1 : -1;
+      gsap.fromTo(cell, { rotate: 3.2 * dir, y: 16 }, {
+        rotate: -3.2 * dir, y: -16, ease: "none",
+        scrollTrigger: { trigger: cell, start: "top bottom", end: "bottom top", scrub: 1 }
+      });
+    });
+
     // Galería masonry: cada foto se mueve a distinta velocidad (parallax)
     gsap.utils.toArray(".masonry .ph img").forEach(function(img, i){
       var dir = (i % 2) ? 1 : -1;
