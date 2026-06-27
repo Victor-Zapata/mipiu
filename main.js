@@ -36,7 +36,9 @@
     star:    svg('<path d="M12 3l2.6 5.8 6.4.6-4.8 4.2 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.4l6.4-.6z"/>'),
     whatsapp:svg('<path d="M6 3h3l1.6 5-2 1.5a11 11 0 0 0 5 5l1.5-2 5 1.6V22a0 0 0 0 1 0 0A18 18 0 0 1 2 5V5a2 2 0 0 1 2-2z"/>'),
     instagram:svg('<rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/>'),
-    pin:     svg('<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>')
+    pin:     svg('<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/>'),
+    chevL:   svg('<path d="M15 5l-7 7 7 7"/>'),
+    chevR:   svg('<path d="M9 5l7 7-7 7"/>')
   };
   var TILE_TINTS = ["verde","turquesa","naranja","morado","amarillo","celeste"];
   var AVATAR_BG  = ["#7A1FA2","#008B8B","#E88C45","#9A4AC7","#5f7d30","#a9810b"];
@@ -75,20 +77,22 @@
   function mountServices(){
     var box = $("[data-services]");
     if (!box || !data.spaces || box.dataset.mounted) return;
-    box.innerHTML = data.spaces.map(function(sp, i){
+    var cards = data.spaces.map(function(sp, i){
       var tint = TILE_TINTS[i % TILE_TINTS.length];
       var ic = ICONS[sp.icon] || ICONS.sparkles;
-      var d = (i % 3) + 1;
       return ''
-      + '<div class="service-cell" data-reveal="fade" data-d="'+d+'">'
-      +   '<article class="card service-card lift">'
-      +     '<div class="icon-tile tile-'+tint+'">'+ic+'</div>'
-      +     '<h3>'+escHTML(sp.name)+'</h3>'
-      +     '<p>'+escHTML(sp.text)+'</p>'
-      +     '<span class="service-tag">'+escHTML(sp.type)+'</span>'
-      +   '</article>'
-      + '</div>';
+      + '<div class="svc-card-w"><article class="card service-card lift">'
+      +   '<div class="icon-tile tile-'+tint+'">'+ic+'</div>'
+      +   '<h3>'+escHTML(sp.name)+'</h3>'
+      +   '<p>'+escHTML(sp.text)+'</p>'
+      +   '<span class="service-tag">'+escHTML(sp.type)+'</span>'
+      + '</article></div>';
     }).join("");
+    box.classList.remove("services-grid");
+    box.innerHTML = '<div class="svc-marquee"><div class="svc-track">'
+      + '<div class="svc-set">' + cards + '</div>'
+      + '<div class="svc-set" aria-hidden="true">' + cards + '</div>'
+      + '</div></div>';
     box.dataset.mounted = "1";
   }
 
@@ -150,17 +154,25 @@
   function mountOpiniones(){
     var box = $("[data-opiniones]");
     if (!box || !data.testimonials || box.dataset.mounted) return;
-    box.innerHTML = data.testimonials.map(function(t, i){
+    var cards = data.testimonials.map(function(t, i){
       var initial = (t.author || "M").trim().charAt(0).toUpperCase();
       var bg = AVATAR_BG[i % AVATAR_BG.length];
       return ''
-      + '<article class="op-card" data-reveal="'+((i%2)?"rise-r":"rise")+'" data-d="'+((i%3)+1)+'">'
-      +   '<div class="op-stars">★★★★★</div>'
-      +   '<p>“'+escHTML(t.quote)+'”</p>'
-      +   '<div class="op-foot"><span class="op-avatar" style="background:'+bg+'">'+escHTML(initial)+'</span>'
-      +     '<div><b>'+escHTML(t.author)+'</b><span>'+escHTML(t.meta||"")+'</span></div></div>'
+      + '<article class="op-card">'
+      +   '<span class="op-avatar" style="background:'+bg+'">'+escHTML(initial)+'</span>'
+      +   '<b class="op-name">'+escHTML(t.author)+'</b>'
+      +   '<span class="op-role">'+escHTML(t.meta||"")+'</span>'
+      +   '<div class="op-stars">★★★★★ <b>5.0</b></div>'
+      +   '<p class="op-quote">“'+escHTML(t.quote)+'”</p>'
       + '</article>';
     }).join("");
+    box.classList.remove("op-grid");
+    box.innerHTML = '<div class="op-carousel" data-op-carousel>'
+      + '<div class="op-stage">' + cards + '</div>'
+      + '<div class="op-nav">'
+      +   '<button class="op-btn" type="button" data-op-prev aria-label="Opinión anterior">' + ICONS.chevL + '</button>'
+      +   '<button class="op-btn" type="button" data-op-next aria-label="Opinión siguiente">' + ICONS.chevR + '</button>'
+      + '</div></div>';
     box.dataset.mounted = "1";
   }
 
@@ -239,6 +251,39 @@
   }
 
   /* =====================================================================
+     CARRUSEL DE OPINIONES (coverflow): central nítida + 2 laterales borrosas
+     ===================================================================== */
+  function initOpCarousel(){
+    var root = $("[data-op-carousel]");
+    if (!root) return;
+    var stage = $(".op-stage", root);
+    var cards = $$(".op-card", root);
+    var n = cards.length;
+    if (!n) return;
+    var active = 0, timer = null;
+    function render(){
+      for (var i = 0; i < n; i++){
+        var c = cards[i];
+        c.classList.remove("is-active", "is-prev", "is-next");
+        if (i === active) c.classList.add("is-active");
+        else if (i === (active - 1 + n) % n) c.classList.add("is-prev");
+        else if (i === (active + 1) % n) c.classList.add("is-next");
+      }
+      if (stage && cards[active]) stage.style.height = (cards[active].offsetHeight + 40) + "px";
+    }
+    function go(d){ active = (active + d + n) % n; render(); }
+    // Avanza siempre (3s por tarjeta), sin pausa en hover.
+    function arm(){ if (timer) clearInterval(timer); timer = setInterval(function(){ go(1); }, 3000); }
+    var prev = $("[data-op-prev]", root), next = $("[data-op-next]", root);
+    if (prev) prev.addEventListener("click", function(){ go(-1); arm(); });
+    if (next) next.addEventListener("click", function(){ go(1); arm(); });
+    render(); arm();
+    window.addEventListener("resize", render);
+    window.addEventListener("load", render);
+    setTimeout(render, 600);
+  }
+
+  /* =====================================================================
      REVEAL al scroll (defensivo: visible sin JS)
      ===================================================================== */
   function initReveal(){
@@ -289,15 +334,6 @@
         scrollTrigger: { trigger: "#beneficios", start: "top bottom", end: "bottom top", scrub: 1 }
       });
     }
-    // Tarjetas de servicios: giro suave al paso del scroll (el hover queda en la tarjeta interior)
-    gsap.utils.toArray(".service-cell").forEach(function(cell, i){
-      var dir = (i % 2) ? 1 : -1;
-      gsap.fromTo(cell, { rotate: 3.2 * dir, y: 16 }, {
-        rotate: -3.2 * dir, y: -16, ease: "none",
-        scrollTrigger: { trigger: cell, start: "top bottom", end: "bottom top", scrub: 1 }
-      });
-    });
-
     // Galería masonry: cada foto se mueve a distinta velocidad (parallax)
     gsap.utils.toArray(".masonry .ph img").forEach(function(img, i){
       var dir = (i % 2) ? 1 : -1;
@@ -396,6 +432,7 @@
     safe(initSplash, "initSplash");
     safe(initNav, "initNav");
     safe(initFaq, "initFaq");
+    safe(initOpCarousel, "initOpCarousel");
     safe(initReveal, "initReveal");
     safe(initCounters, "initCounters");
     safe(initForm, "initForm");

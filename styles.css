@@ -274,6 +274,19 @@ p { text-wrap: pretty; }
 }
 .service-card p { margin-bottom: 1.2rem; }
 
+/* Servicios: marquee infinito (carrusel auto-scroll) */
+.svc-marquee {
+  overflow: hidden; position: relative; padding-block: 18px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+.svc-track { display: flex; width: max-content; animation: marqueeX 46s linear infinite; }
+.svc-track:hover { animation-play-state: paused; }
+.svc-set { display: contents; }
+.svc-card-w { width: 320px; flex: none; margin-right: 1.4rem; padding: 6px; }
+.svc-card-w .service-card { height: 100%; }
+@keyframes marqueeX { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
 /* =============================================================
    9. GALERÍA (masonry)
    ============================================================= */
@@ -342,14 +355,46 @@ p { text-wrap: pretty; }
 /* =============================================================
    12. OPINIONES
    ============================================================= */
+/* Tarjeta de opinión (centrada, estilo "focus card") */
+.op-card { background: #fff; border: 1px solid var(--line); border-radius: var(--r-xl); padding: clamp(1.6rem, 2.4vw, 2.4rem); box-shadow: var(--shadow); text-align: center; }
+.op-avatar { width: 60px; height: 60px; border-radius: 18px; margin: 0 auto 1rem; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 1.5rem; color: #fff; }
+.op-name { font-family: var(--display); font-weight: 700; font-size: 1.2rem; display: block; }
+.op-role { color: var(--muted); font-size: .86rem; display: block; margin-bottom: 1rem; }
+.op-stars { color: var(--amarillo); letter-spacing: .12em; margin-bottom: 1rem; }
+.op-stars b { color: var(--ink); font-family: var(--display); font-size: .92rem; letter-spacing: 0; margin-left: .5em; }
+.op-quote { color: var(--ink-80); font-size: 1.02rem; line-height: 1.65; max-width: 42ch; margin-inline: auto; }
+
+/* Fallback sin JS */
 .op-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
-.op-card { background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg); padding: 1.8rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
-.op-stars { color: var(--amarillo); letter-spacing: .1em; margin-bottom: .9rem; }
-.op-card p { font-size: 1.02rem; color: var(--ink-80); }
-.op-foot { display: flex; align-items: center; gap: .8rem; margin-top: 1.4rem; }
-.op-avatar { width: 42px; height: 42px; border-radius: 50%; flex: none; display: grid; place-items: center; font-family: var(--display); font-weight: 700; color: #fff; }
-.op-foot b { font-family: var(--display); font-size: .98rem; display: block; }
-.op-foot span { color: var(--muted); font-size: .82rem; }
+
+/* Carrusel de foco (coverflow): central nítida + 2 laterales borrosas y más arriba */
+.op-carousel { position: relative; padding-top: 26px; }
+.op-stage { position: relative; height: 460px; transition: height .5s var(--ease); }
+.op-carousel .op-card {
+  position: absolute; top: 0; left: 50%; width: min(384px, 86vw);
+  transform: translateX(-50%) scale(.78); opacity: 0; filter: blur(7px);
+  pointer-events: none; z-index: 1;
+  transition: transform .65s var(--ease), opacity .65s var(--ease), filter .65s var(--ease);
+}
+.op-carousel .op-card.is-active { transform: translateX(-50%) translateY(20px) scale(1); opacity: 1; filter: blur(0); z-index: 3; pointer-events: auto; }
+.op-carousel .op-card.is-prev { transform: translateX(calc(-50% - 320px)) translateY(-14px) scale(.82) rotate(-7deg); opacity: .5; filter: blur(5px); z-index: 2; }
+.op-carousel .op-card.is-next { transform: translateX(calc(-50% + 320px)) translateY(-14px) scale(.82) rotate(7deg); opacity: .5; filter: blur(5px); z-index: 2; }
+.op-nav { display: flex; justify-content: center; gap: 1rem; margin-top: 1.4rem; }
+.op-btn {
+  width: 54px; height: 54px; border-radius: 50%; background: #fff; border: 1px solid var(--line);
+  box-shadow: var(--shadow); display: grid; place-items: center; color: var(--ink);
+  transition: transform .25s var(--spring), box-shadow .25s, background .25s, color .25s, border-color .25s;
+}
+.op-btn:hover { transform: translateY(-3px); background: var(--morado); color: #fff; border-color: var(--morado); box-shadow: var(--shadow-btn); }
+.op-btn svg { width: 22px; height: 22px; }
+@media (max-width: 1040px) {
+  .op-carousel .op-card.is-prev { transform: translateX(calc(-50% - 250px)) translateY(-14px) scale(.8) rotate(-7deg); }
+  .op-carousel .op-card.is-next { transform: translateX(calc(-50% + 250px)) translateY(-14px) scale(.8) rotate(7deg); }
+}
+@media (max-width: 760px) {
+  .op-carousel .op-card.is-prev, .op-carousel .op-card.is-next { opacity: 0; }
+  .op-grid { grid-template-columns: 1fr; }
+}
 
 /* =============================================================
    13. FAQ
@@ -433,19 +478,19 @@ p { text-wrap: pretty; }
    17. REVEAL — animaciones al scroll (defensivo: visible sin JS)
    ============================================================= */
 html.js-reveal [data-reveal] {
-  opacity: 0; transform: translateY(32px);
-  transition: opacity .7s var(--ease), transform .8s var(--ease);
-  will-change: opacity, transform;
+  opacity: 0; transform: translateY(30px); filter: blur(10px);
+  transition: opacity .85s var(--ease), transform .9s var(--ease), filter .9s var(--ease);
+  will-change: opacity, transform, filter;
 }
 html.js-reveal [data-reveal="scale"] { transform: scale(.93); }
 html.js-reveal [data-reveal="left"] { transform: translateX(-36px); }
 html.js-reveal [data-reveal="right"] { transform: translateX(36px); }
 html.js-reveal [data-reveal="rise"] { transform: translateY(48px) rotate(-2.6deg) scale(.96); }
 html.js-reveal [data-reveal="rise-r"] { transform: translateY(48px) rotate(2.6deg) scale(.96); }
-html.js-reveal [data-reveal].in { opacity: 1; transform: none; }
-/* variante solo-opacidad: para elementos cuyo transform controla GSAP (parallax/giro al scroll) */
-html.js-reveal [data-reveal="fade"] { transform: none; transition: opacity .7s var(--ease); }
-html.js-reveal [data-reveal="fade"].in { opacity: 1; transform: none; }
+html.js-reveal [data-reveal].in { opacity: 1; transform: none; filter: blur(0); }
+/* variante solo-opacidad+desenfoque: para elementos cuyo transform controla GSAP */
+html.js-reveal [data-reveal="fade"] { transform: none; filter: blur(10px); transition: opacity .8s var(--ease), filter .8s var(--ease); }
+html.js-reveal [data-reveal="fade"].in { opacity: 1; transform: none; filter: blur(0); }
 /* objetivos de parallax/rotación al scroll */
 .hero-photo, .about-photo img, .bento-cell.lg img, .masonry .ph img { will-change: transform; }
 [data-d="1"] { transition-delay: .06s; }
